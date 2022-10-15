@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MVCTemplate.Web.Data;
+using MVCTemplate.Web.Services;
+using MVCTemplate.Web.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,16 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.Configure<SmtpSetting>(options =>
+{
+    options.Host = builder.Configuration["SmtpHost"];
+    options.Port = Convert.ToInt32(builder.Configuration["SmtpPort"]);
+    options.User = builder.Configuration["SmtpUser"];
+    options.Password = builder.Configuration["SmtpPassword"];
+});
+
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
