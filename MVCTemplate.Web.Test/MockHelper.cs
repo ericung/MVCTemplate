@@ -100,4 +100,17 @@ public static class MockHelper
         sm.Logger = logger ?? NullLogger<SignInManager<IdentityUser>>.Instance;
         return sm;
     }
+    public static Mock<SignInManager<IdentityUser>> SetupSignInManagerMock(UserManager<IdentityUser> manager, HttpContext context, ILogger logger = null, IdentityOptions identityOptions = null, IAuthenticationSchemeProvider schemeProvider = null)
+    {
+        var contextAccessor = new Mock<IHttpContextAccessor>();
+        contextAccessor.Setup(a => a.HttpContext).Returns(context);
+        var roleManager = MockRoleManager<IdentityRole>();
+        identityOptions = identityOptions ?? new IdentityOptions();
+        var options = new Mock<IOptions<IdentityOptions>>();
+        options.Setup(a => a.Value).Returns(identityOptions);
+        var claimsFactory = new UserClaimsPrincipalFactory<IdentityUser, IdentityRole>(manager, roleManager.Object, options.Object);
+        schemeProvider = schemeProvider ?? new Mock<IAuthenticationSchemeProvider>().Object;
+        var sm = new Mock<SignInManager<IdentityUser>>(manager, contextAccessor.Object, claimsFactory, options.Object, logger ?? NullLogger<SignInManager<IdentityUser>>.Instance, schemeProvider, new DefaultUserConfirmation<IdentityUser>());
+        return sm;
+    }
 }
