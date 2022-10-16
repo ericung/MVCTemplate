@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -108,5 +109,61 @@ namespace MVCTemplate.Web.Test.Controllers
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
+        [TestMethod]
+        public void RegisterSucceed()
+        {
+            var mockUrlHelper = MockHelper.CreateMockUrlHelper();
+            Mock<UserManager<IdentityUser>> mockUserManager = MockHelper.MockUserManager<IdentityUser>();
+            mockUserManager.Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(),It.IsAny<string>())).Returns(
+                Task.FromResult(IdentityResult.Success));
+            mockUserManager.Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<IdentityUser>())).Returns(
+                Task.FromResult("aaa"));
+            Mock<IEmailService> mockEmailServce = new Mock<IEmailService>();
+            mockEmailServce.Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(
+                Task.FromResult(new { }));
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, mockEmailServce.Object);
+            accountController.Url = mockUrlHelper.Object;
+
+            var result = accountController.Register(new Models.RegisterViewModel
+            {
+                Email = "test@test.com",
+                Password = "abc123"
+            }).Result;
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+            var actionResult = (RedirectToActionResult)result;
+            Assert.AreEqual("Account", actionResult.ControllerName);
+            Assert.AreEqual("Login", actionResult.ActionName);
+        }
+
+        [TestMethod]
+        public void RegisterFailed()
+        {
+            Mock<UserManager<IdentityUser>> mockUserManager = MockHelper.MockUserManager<IdentityUser>();
+            mockUserManager.Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>())).Returns(
+                Task.FromResult(IdentityResult.Failed(new IdentityError[]
+                {
+                    new IdentityError
+                    {
+                        Code = "Register",
+                        Description = "Invalid input"
+                    }
+                })));
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService);
+
+            var result = accountController.Register(new Models.RegisterViewModel
+            {
+                Email = "test@test.com",
+                Password = "abc123"
+            }).Result;
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+            var viewResult = (ViewResult)result;
+            Assert.IsNotNull(viewResult.ViewData.ModelState["Register"]);
+            Assert.IsNotNull(viewResult.ViewData.ModelState["Register"].Errors.FirstOrDefault());
+            Assert.AreEqual("Invalid input", viewResult.ViewData.ModelState["Register"].Errors.FirstOrDefault().ErrorMessage);
+        }
     }
 }

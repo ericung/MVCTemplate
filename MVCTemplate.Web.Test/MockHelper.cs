@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -112,5 +113,45 @@ public static class MockHelper
         schemeProvider = schemeProvider ?? new Mock<IAuthenticationSchemeProvider>().Object;
         var sm = new Mock<SignInManager<IdentityUser>>(manager, contextAccessor.Object, claimsFactory, options.Object, logger ?? NullLogger<SignInManager<IdentityUser>>.Instance, schemeProvider, new DefaultUserConfirmation<IdentityUser>());
         return sm;
+    }
+
+    public static Mock<IUrlHelper> CreateMockUrlHelper(ActionContext context = null)
+    {
+        context ??= GetActionContextForPage("/Page");
+
+        var urlHelper = new Mock<IUrlHelper>();
+        urlHelper.SetupGet(h => h.ActionContext)
+            .Returns(context);
+        return urlHelper;
+    }
+
+    private static ActionContext GetActionContextForPage(string page)
+    {
+        // Create HttpContext mock
+        var requestUrl = new Uri("http://myrequesturl");
+        var request = Mock.Of<HttpRequest>();
+        var requestMock = Mock.Get(request);
+        var httpcontext = Mock.Of<HttpContext>();
+        var httpcontextSetup = Mock.Get(httpcontext);
+        httpcontextSetup.Setup(m => m.Request).Returns(request);
+
+        return new()
+        {
+            ActionDescriptor = new()
+            {
+                RouteValues = new Dictionary<string, string?>
+                {
+                    { "page", page },
+                }
+            },
+            RouteData = new()
+            {
+                Values =
+                {
+                    [ "page" ] = page
+                }
+            },
+            HttpContext = httpcontext
+        };
     }
 }
