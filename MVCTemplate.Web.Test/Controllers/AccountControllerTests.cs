@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using MVCTemplate.Web.Controllers;
+using MVCTemplate.Web.Models;
 using MVCTemplate.Web.Services;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
@@ -164,6 +165,78 @@ namespace MVCTemplate.Web.Test.Controllers
             Assert.IsNotNull(viewResult.ViewData.ModelState["Register"]);
             Assert.IsNotNull(viewResult.ViewData.ModelState["Register"].Errors.FirstOrDefault());
             Assert.AreEqual("Invalid input", viewResult.ViewData.ModelState["Register"].Errors.FirstOrDefault().ErrorMessage);
+        }
+
+        [TestMethod]
+        public void ConfirmEmailSucceed()
+        {
+            Mock<UserManager<IdentityUser>> mockUserManager = MockHelper.MockUserManager<IdentityUser>();
+            mockUserManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).Returns(
+                Task.FromResult(new IdentityUser
+                {
+                    Id = "123"
+                }));
+            mockUserManager.Setup(x => x.ConfirmEmailAsync(It.IsAny<IdentityUser>(),It.IsAny<string>())).Returns(
+                Task.FromResult(IdentityResult.Success));
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService);
+
+            var result = accountController.ConfirmEmail("test@test.com","abc123").Result;
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+            var viewResult = (ViewResult)result;
+            Assert.IsNotNull(viewResult.Model);
+            Assert.IsInstanceOfType(viewResult.Model, typeof(ConfirmEmailViewModel));
+            var viewModel = (ConfirmEmailViewModel)viewResult.Model;
+            Assert.AreEqual("Email address successfully confirmed", viewModel.Message);
+        }
+
+        [TestMethod]
+        public void ConfirmEmailFail()
+        {
+            Mock<UserManager<IdentityUser>> mockUserManager = MockHelper.MockUserManager<IdentityUser>();
+            mockUserManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).Returns(
+                Task.FromResult(new IdentityUser
+                {
+                    Id = "123"
+                }));
+            mockUserManager.Setup(x => x.ConfirmEmailAsync(It.IsAny<IdentityUser>(),It.IsAny<string>())).Returns(
+                Task.FromResult(IdentityResult.Failed(new IdentityError[]
+                {
+                    new IdentityError
+                    {
+                        Code = "ConfirmEmail",
+                        Description = "Failed to confirm"
+                    }
+                })));
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService);
+
+            var result = accountController.ConfirmEmail("test@test.com","abc123").Result;
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+            var viewResult = (ViewResult)result;
+            Assert.IsNotNull(viewResult.Model);
+            Assert.IsInstanceOfType(viewResult.Model, typeof(ConfirmEmailViewModel));
+            var viewModel = (ConfirmEmailViewModel)viewResult.Model;
+            Assert.AreEqual("Failed to validate email", viewModel.Message);
+        }
+
+        [TestMethod]
+        public void ConfirmEmailNullUserFound()
+        {
+            Mock<UserManager<IdentityUser>> mockUserManager = MockHelper.MockUserManager<IdentityUser>();
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService);
+
+            var result = accountController.ConfirmEmail("test@test.com","abc123").Result;
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+            var viewResult = (ViewResult)result;
+            Assert.IsNotNull(viewResult.Model);
+            Assert.IsInstanceOfType(viewResult.Model, typeof(ConfirmEmailViewModel));
+            var viewModel = (ConfirmEmailViewModel)viewResult.Model;
+            Assert.AreEqual("Failed to validate email", viewModel.Message);
         }
     }
 }
