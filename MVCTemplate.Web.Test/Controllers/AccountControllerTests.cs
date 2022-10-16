@@ -238,5 +238,23 @@ namespace MVCTemplate.Web.Test.Controllers
             var viewModel = (ConfirmEmailViewModel)viewResult.Model;
             Assert.AreEqual("Failed to validate email", viewModel.Message);
         }
+
+        [TestMethod]
+        public void LogoutSucceed()
+        {
+            Mock<SignInManager<IdentityUser>> signInManagerMock = MockHelper.SetupSignInManagerMock(userManagerMock.Object, httpContextMock.Object);
+            signInManagerMock.Setup(x => x.SignOutAsync()).Returns(
+                Task.FromResult(IdentityResult.Success));
+            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService);
+
+            var result = accountController.Logout().Result;
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+            var actionResult = (RedirectToActionResult)result;
+            Assert.AreEqual("Account", actionResult.ControllerName);
+            Assert.AreEqual("Login", actionResult.ActionName);
+        }
+
     }
 }
