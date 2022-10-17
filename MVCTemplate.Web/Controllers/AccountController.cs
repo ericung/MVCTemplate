@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using MVCTemplate.Web.Models;
 using MVCTemplate.Web.Services;
-using System.Security.Cryptography.X509Certificates;
 
 namespace MVCTemplate.Web.Controllers
 {

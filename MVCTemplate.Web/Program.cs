@@ -63,4 +63,14 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+
+using (var scope = scopeFactory.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    UserInitializer.Seed(roleManager, userManager, app.Configuration["AdminPassword"]).Wait();
+}
+
 app.Run();
+
