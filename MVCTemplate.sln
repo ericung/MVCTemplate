@@ -5,7 +5,9 @@ VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MVCTemplate.Web", "MVCTemplate.Web\MVCTemplate.Web.csproj", "{F42BBE17-1942-4FE5-88B0-360A2CEDEA0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVCTemplate.Web.Test", "MVCTemplate.Web.Test\MVCTemplate.Web.Test.csproj", "{DFF1F110-FD92-4540-B946-F29960099359}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MVCTemplate.Web.Test", "MVCTemplate.Web.Test\MVCTemplate.Web.Test.csproj", "{DFF1F110-FD92-4540-B946-F29960099359}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVCTemplate.Api", "MVCTemplate.Api\MVCTemplate.Api.csproj", "{A7196289-ACB2-468E-9265-6C767BF2C102}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{DFF1F110-FD92-4540-B946-F29960099359}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFF1F110-FD92-4540-B946-F29960099359}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFF1F110-FD92-4540-B946-F29960099359}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7196289-ACB2-468E-9265-6C767BF2C102}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7196289-ACB2-468E-9265-6C767BF2C102}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7196289-ACB2-468E-9265-6C767BF2C102}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7196289-ACB2-468E-9265-6C767BF2C102}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
