@@ -17,6 +17,7 @@ namespace MVCTemplate.Web.Controllers
         [HttpGet]
         public IActionResult ViewRoles()
         {
+            var roles = roleManager.Roles;
             return View();
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MVCTemplate.Web.Data;
 using MVCTemplate.Web.Models;
 using MVCTemplate.Web.Services;
 
@@ -77,6 +78,7 @@ namespace MVCTemplate.Web.Controllers
             var result = await userManager.CreateAsync(user, registerViewModel.Password);
             if (result.Succeeded)
             {
+                await userManager.AddToRoleAsync(user, Roles.User.ToString());
                 var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
                 var confirmationLink = Url.ActionLink(action: "ConfirmEmail", controller: "Account",
                     values: new { userId = user.Id, token = confirmationToken });
