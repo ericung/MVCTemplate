@@ -20,12 +20,13 @@ namespace MVCTemplate.Web.Test.Controllers
         private static Mock<UserManager<IdentityUser>> userManagerMock = MockHelper.MockUserManager<IdentityUser>();
         private static SignInManager<IdentityUser> signInManager = MockHelper.SetupSignInManager(userManagerMock.Object, httpContextMock.Object);
         IEmailService emailService = (new Mock<IEmailService>()).Object;
+        private static Mock<IHttpClientFactory> httpClientFactoryMock = new Mock<IHttpClientFactory>();
 
         [TestMethod]
         public void LoginGetTest()
         {
 
-            AccountController accountController = new AccountController(signInManager, userManagerMock.Object, emailService);
+            AccountController accountController = new AccountController(signInManager, userManagerMock.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.Login();
 
@@ -39,7 +40,7 @@ namespace MVCTemplate.Web.Test.Controllers
             Mock<SignInManager<IdentityUser>> signInManagerMock = MockHelper.SetupSignInManagerMock(userManagerMock.Object, httpContextMock.Object);
             signInManagerMock.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), false, false)).Returns(
                 Task.FromResult(SignInResult.Success));
-            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService);
+            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.Login(new Models.CredentialViewModel
             {
@@ -60,7 +61,7 @@ namespace MVCTemplate.Web.Test.Controllers
             Mock<SignInManager<IdentityUser>> signInManagerMock = MockHelper.SetupSignInManagerMock(userManagerMock.Object, httpContextMock.Object);
             signInManagerMock.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), false, false)).Returns(
                 Task.FromResult(SignInResult.LockedOut));
-            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService);
+            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.Login(new Models.CredentialViewModel
             {
@@ -82,7 +83,7 @@ namespace MVCTemplate.Web.Test.Controllers
             Mock<SignInManager<IdentityUser>> signInManagerMock = MockHelper.SetupSignInManagerMock(userManagerMock.Object, httpContextMock.Object);
             signInManagerMock.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), false, false)).Returns(
                 Task.FromResult(SignInResult.Failed));
-            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService);
+            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.Login(new Models.CredentialViewModel
             {
@@ -102,7 +103,7 @@ namespace MVCTemplate.Web.Test.Controllers
         [TestMethod]
         public void RegisterGet()
         {
-            AccountController accountController = new AccountController(signInManager, userManagerMock.Object, emailService);
+            AccountController accountController = new AccountController(signInManager, userManagerMock.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.Register();
 
@@ -122,7 +123,7 @@ namespace MVCTemplate.Web.Test.Controllers
             Mock<IEmailService> mockEmailServce = new Mock<IEmailService>();
             mockEmailServce.Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(
                 Task.FromResult(new { }));
-            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, mockEmailServce.Object);
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, mockEmailServce.Object, httpClientFactoryMock.Object);
             accountController.Url = mockUrlHelper.Object;
 
             var result = accountController.Register(new Models.RegisterViewModel
@@ -151,7 +152,7 @@ namespace MVCTemplate.Web.Test.Controllers
                         Description = "Invalid input"
                     }
                 })));
-            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService);
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.Register(new Models.RegisterViewModel
             {
@@ -178,7 +179,7 @@ namespace MVCTemplate.Web.Test.Controllers
                 }));
             mockUserManager.Setup(x => x.ConfirmEmailAsync(It.IsAny<IdentityUser>(),It.IsAny<string>())).Returns(
                 Task.FromResult(IdentityResult.Success));
-            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService);
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.ConfirmEmail("test@test.com","abc123").Result;
 
@@ -209,7 +210,7 @@ namespace MVCTemplate.Web.Test.Controllers
                         Description = "Failed to confirm"
                     }
                 })));
-            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService);
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.ConfirmEmail("test@test.com","abc123").Result;
 
@@ -226,7 +227,7 @@ namespace MVCTemplate.Web.Test.Controllers
         public void ConfirmEmailNullUserFound()
         {
             Mock<UserManager<IdentityUser>> mockUserManager = MockHelper.MockUserManager<IdentityUser>();
-            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService);
+            AccountController accountController = new AccountController(signInManager, mockUserManager.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.ConfirmEmail("test@test.com","abc123").Result;
 
@@ -245,7 +246,7 @@ namespace MVCTemplate.Web.Test.Controllers
             Mock<SignInManager<IdentityUser>> signInManagerMock = MockHelper.SetupSignInManagerMock(userManagerMock.Object, httpContextMock.Object);
             signInManagerMock.Setup(x => x.SignOutAsync()).Returns(
                 Task.FromResult(IdentityResult.Success));
-            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService);
+            AccountController accountController = new AccountController(signInManagerMock.Object, userManagerMock.Object, emailService, httpClientFactoryMock.Object);
 
             var result = accountController.Logout().Result;
 

@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MVCTemplate.Web.Data;
+using MVCTemplate.Web.Managers;
 using MVCTemplate.Web.Models;
 using System.Diagnostics;
 
@@ -17,6 +20,12 @@ namespace MVCTemplate.Web.Controllers
 
         public IActionResult Index()
         {
+            return View();
+        }
+
+        public async Task<ActionResult> GetApi()
+        {
+            //var result = await InvokeEndPoint("Api", "Test");
             return View();
         }
 

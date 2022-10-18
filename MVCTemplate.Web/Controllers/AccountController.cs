@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.HttpSys;
 using MVCTemplate.Web.Data;
+using MVCTemplate.Web.Managers;
 using MVCTemplate.Web.Models;
 using MVCTemplate.Web.Services;
 
@@ -11,15 +13,18 @@ namespace MVCTemplate.Web.Controllers
         private readonly SignInManager<IdentityUser> signInManager;
         private readonly UserManager<IdentityUser> userManager;
         private readonly IEmailService emailService;
+        private readonly IHttpClientFactory httpClientFactory;
 
         public AccountController(
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
-            IEmailService emailService)
+            IEmailService emailService,
+            IHttpClientFactory httpClientFactory)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.emailService = emailService;
+            this.httpClientFactory = httpClientFactory;
         }
 
         [HttpGet]
@@ -41,6 +46,10 @@ namespace MVCTemplate.Web.Controllers
 
             if (result.Succeeded)
             {
+                var user = await this.userManager.FindByEmailAsync(credential.Email);
+                var claims = await this.userManager.GetClaimsAsync(user);
+                var token = await TokenManager.Authenticate(httpClientFactory, new TokenModel { User = user, Claims = claims });
+                HttpContext.Session.SetString("access_token", token.AccessToken);
                 return RedirectToAction("Index","Home");
             }
             else
